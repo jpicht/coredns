@@ -155,7 +155,7 @@ func (z *Zone) Lookup(ctx context.Context, state request.Request, qname string) 
 	// Found entire name.
 	if found && shot {
 
-		if rrs := elem.Type(dns.TypeCNAME); len(rrs) > 0 && qtype != dns.TypeCNAME {
+		if rrs := elem.Type(dns.TypeCNAME); len(rrs) > 0 && qtype != dns.TypeCNAME && qtype != dns.TypeANY {
 			return z.externalLookup(ctx, state, elem, rrs)
 		}
 
@@ -373,6 +373,8 @@ func (z *Zone) additionalProcessing(answer []dns.RR, do bool) (extra []dns.RR) {
 			name = x.Target
 		case *dns.MX:
 			name = x.Mx
+		case *dns.CNAME:
+			name = x.Target
 		}
 		if len(name) == 0 || !dns.IsSubDomain(z.origin, name) {
 			continue

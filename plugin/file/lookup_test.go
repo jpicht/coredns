@@ -95,6 +95,19 @@ var dnsTestCases = []test.Case{
 		},
 		Ns: miekAuth,
 	},
+	{
+		Qname: "any.miek.nl.", Qtype: dns.TypeANY,
+		Answer: []dns.RR{
+			test.A("any.miek.nl.		1800	IN	A       127.0.0.1"),
+			test.AAAA("any.miek.nl.	1800	IN	AAAA	::1"),
+			test.CNAME("any.miek.nl.	1800	IN	CNAME	a.miek.nl."),
+		},
+		Extra: []dns.RR{
+			test.A("a.miek.nl.	1800	IN	A       139.162.196.78"),
+			test.AAAA("a.miek.nl.	1800	IN	AAAA	2a01:7e00::f03c:91ff:fef1:6735"),
+		},
+		Ns: miekAuth,
+	},
 }
 
 const (
@@ -191,6 +204,10 @@ a               IN      A       139.162.196.78
                 IN      AAAA    2a01:7e00::f03c:91ff:fef1:6735
 www             IN      CNAME   a
 archive         IN      CNAME   a
+
+any 	IN	A	127.0.0.1
+any		IN	AAAA	::1
+any		IN	CNAME	a
 
 srv		IN	SRV     10 10 8080 a.miek.nl.
 mx		IN	MX      10 a.miek.nl.`

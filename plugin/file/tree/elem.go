@@ -26,8 +26,13 @@ func (e *Elem) Types() []uint16 {
 	return t
 }
 
-// Type returns the RRs with type qtype from e.
-func (e *Elem) Type(qtype uint16) []dns.RR { return e.m[qtype] }
+// Type returns the RRs with type qtype from e or all if qtype == ANY.
+func (e *Elem) Type(qtype uint16) []dns.RR {
+	if qtype == dns.TypeANY {
+		return e.All()
+	}
+	return e.m[qtype]
+}
 
 // TypeForWildcard returns the RRs with type qtype from e. The ownername returned is set to qname.
 func (e *Elem) TypeForWildcard(qtype uint16, qname string) []dns.RR {
