@@ -146,6 +146,8 @@ func (z *Zone) Lookup(ctx context.Context, state request.Request, qname string) 
 	}
 
 	// What does found and !shot mean - do we ever hit it?
+	// No, it cannot currently be hit. Because the only way to exit the loop without exiting the function
+	// is conditional on shot.
 	if found && !shot {
 		return nil, nil, nil, ServerFailure
 	}
