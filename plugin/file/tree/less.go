@@ -43,11 +43,11 @@ func less(a, b string) int {
 }
 
 func doDDD(b []byte) {
-	lb := len(b)
+	lb := len(b) - 3
 	for i := 0; i < lb; i++ {
-		if i+3 < lb && b[i] == '\\' && isDigit(b[i+1]) && isDigit(b[i+2]) && isDigit(b[i+3]) {
+		if b[i] == '\\' && isDigit(b[i+1]) && isDigit(b[i+2]) && isDigit(b[i+3]) {
 			b[i] = dddToByte(b[i:])
-			for j := i + 1; j < lb-3; j++ {
+			for j := i + 1; j < lb; j++ {
 				b[j] = b[j+3]
 			}
 			lb -= 3
