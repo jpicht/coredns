@@ -28,6 +28,7 @@ var Directives = []string{
 	"log",
 	"dnstap",
 	"acl",
+	"anyplex",
 	"any",
 	"chaos",
 	"loadbalance",
