@@ -4,8 +4,9 @@ import "github.com/miekg/dns"
 
 // Elem is an element in the tree.
 type Elem struct {
-	m    map[uint16][]dns.RR
-	name string // owner name
+	m            map[uint16][]dns.RR
+	name         string // owner name
+	preparedName []byte
 }
 
 // newElem returns a new elem.
@@ -66,6 +67,14 @@ func (e *Elem) Name() string {
 	return ""
 }
 
+// PreparedName returns the less-compare-prepared name for this node.
+func (e *Elem) PreparedName() prepared {
+	if e.preparedName == nil {
+		e.preparedName = prepareName(e.Name())
+	}
+	return e.preparedName
+}
+
 // Empty returns true is e does not contain any RRs, i.e. is an empty-non-terminal.
 func (e *Elem) Empty() bool { return len(e.m) == 0 }
 
@@ -98,4 +107,4 @@ func (e *Elem) Delete(rr dns.RR) {
 }
 
 // Less is a tree helper function that calls less.
-func Less(a *Elem, name string) int { return less(name, a.Name()) }
+func Less(a *Elem, name string) int { return less(prepareName(name), a.PreparedName()) }
