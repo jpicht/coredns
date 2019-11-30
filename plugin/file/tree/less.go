@@ -9,21 +9,21 @@ package tree
 //
 // The values of a and b are *not* lowercased before the comparison!
 func less(ap, bp prepared) int {
-	ai, al := 0, len(ap)
-	bi, bl := 0, len(bp)
-	for ai < al && bi < bl {
-		if ap[ai] == '.' && bp[bi] != '.' {
+	i := 0
+	al := len(ap)
+	bl := len(bp)
+	for i < al && i < bl {
+		if ap[i] == '.' && bp[i] != '.' {
 			return -1
-		} else if ap[ai] != '.' && bp[bi] == '.' {
+		} else if ap[i] != '.' && bp[i] == '.' {
 			return 1
 		}
-		res := int(ap[ai]) - int(bp[bi])
+		res := int(ap[i]) - int(bp[i])
 		if res != 0 {
 			return res
 		}
 
-		ai++
-		bi++
+		i++
 	}
 	return al - bl
 }
