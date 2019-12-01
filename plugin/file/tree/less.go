@@ -13,11 +13,6 @@ func less(ap, bp prepared) int {
 	al := len(ap)
 	bl := len(bp)
 	for i < al && i < bl {
-		if ap[i] == '.' && bp[i] != '.' {
-			return -1
-		} else if ap[i] != '.' && bp[i] == '.' {
-			return 1
-		}
 		res := int(ap[i]) - int(bp[i])
 		if res != 0 {
 			return res
