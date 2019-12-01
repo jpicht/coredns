@@ -142,7 +142,7 @@ func (t *Tree) Search(qname string) (*Elem, bool) {
 	if t.Root == nil {
 		return nil, false
 	}
-	n, res := t.Root.search(qname)
+	n, res := t.Root.search(prepareName(qname))
 	if n == nil {
 		return nil, res
 	}
@@ -150,9 +150,9 @@ func (t *Tree) Search(qname string) (*Elem, bool) {
 }
 
 // search searches the tree for qname and type.
-func (n *Node) search(qname string) (*Node, bool) {
+func (n *Node) search(qname prepared) (*Node, bool) {
 	for n != nil {
-		switch c := Less(n.Elem, qname); {
+		switch c := less(qname, n.Elem.preparedName); {
 		case c == 0:
 			return n, true
 		case c < 0:
@@ -169,17 +169,17 @@ func (n *Node) search(qname string) (*Node, bool) {
 // with e or when a nil node is reached.
 func (t *Tree) Insert(rr dns.RR) {
 	var d int
-	t.Root, d = t.Root.insert(rr)
+	t.Root, d = t.Root.insert(rr, prepareName(rr.Header().Name))
 	t.Count += d
 	t.Root.Color = black
 }
 
 // insert inserts rr in to the tree.
-func (n *Node) insert(rr dns.RR) (root *Node, d int) {
+func (n *Node) insert(rr dns.RR, pn prepared) (root *Node, d int) {
 	if n == nil {
-		return &Node{Elem: newElem(rr)}, 1
+		return &Node{Elem: newElem(rr, pn)}, 1
 	} else if n.Elem == nil {
-		n.Elem = newElem(rr)
+		n.Elem = newElem(rr, pn)
 		return n, 1
 	}
 
@@ -189,13 +189,13 @@ func (n *Node) insert(rr dns.RR) (root *Node, d int) {
 		}
 	}
 
-	switch c := Less(n.Elem, rr.Header().Name); {
+	switch c := less(pn, n.Elem.preparedName); {
 	case c == 0:
 		n.Elem.Insert(rr)
 	case c < 0:
-		n.Left, d = n.Left.insert(rr)
+		n.Left, d = n.Left.insert(rr, pn)
 	default:
-		n.Right, d = n.Right.insert(rr)
+		n.Right, d = n.Right.insert(rr, pn)
 	}
 
 	if n.Right.color() == red && n.Left.color() == black {
@@ -298,7 +298,7 @@ func (t *Tree) deleteNode(rr dns.RR) {
 		return
 	}
 	var d int
-	t.Root, d = t.Root.delete(rr)
+	t.Root, d = t.Root.delete(rr, prepareName(rr.Header().Name))
 	t.Count += d
 	if t.Root == nil {
 		return
@@ -306,30 +306,30 @@ func (t *Tree) deleteNode(rr dns.RR) {
 	t.Root.Color = black
 }
 
-func (n *Node) delete(rr dns.RR) (root *Node, d int) {
-	if Less(n.Elem, rr.Header().Name) < 0 {
+func (n *Node) delete(rr dns.RR, pn prepared) (root *Node, d int) {
+	if less(pn, n.Elem.preparedName) < 0 {
 		if n.Left != nil {
 			if n.Left.color() == black && n.Left.Left.color() == black {
 				n = n.moveRedLeft()
 			}
-			n.Left, d = n.Left.delete(rr)
+			n.Left, d = n.Left.delete(rr, pn)
 		}
 	} else {
 		if n.Left.color() == red {
 			n = n.rotateRight()
 		}
-		if n.Right == nil && Less(n.Elem, rr.Header().Name) == 0 {
+		if n.Right == nil && less(pn, n.Elem.preparedName) == 0 {
 			return nil, -1
 		}
 		if n.Right != nil {
 			if n.Right.color() == black && n.Right.Left.color() == black {
 				n = n.moveRedRight()
 			}
-			if Less(n.Elem, rr.Header().Name) == 0 {
+			if less(pn, n.Elem.preparedName) == 0 {
 				n.Elem = n.Right.min().Elem
 				n.Right, d = n.Right.deleteMin()
 			} else {
-				n.Right, d = n.Right.delete(rr)
+				n.Right, d = n.Right.delete(rr, pn)
 			}
 		}
 	}
@@ -372,18 +372,18 @@ func (t *Tree) Prev(qname string) (*Elem, bool) {
 		return nil, false
 	}
 
-	n := t.Root.floor(qname)
+	n := t.Root.floor(prepareName(qname))
 	if n == nil {
 		return nil, false
 	}
 	return n.Elem, true
 }
 
-func (n *Node) floor(qname string) *Node {
+func (n *Node) floor(qname prepared) *Node {
 	if n == nil {
 		return nil
 	}
-	switch c := Less(n.Elem, qname); {
+	switch c := less(qname, n.Elem.preparedName); {
 	case c == 0:
 		return n
 	case c <= 0:
@@ -401,18 +401,18 @@ func (t *Tree) Next(qname string) (*Elem, bool) {
 	if t.Root == nil {
 		return nil, false
 	}
-	n := t.Root.ceil(qname)
+	n := t.Root.ceil(prepareName(qname))
 	if n == nil {
 		return nil, false
 	}
 	return n.Elem, true
 }
 
-func (n *Node) ceil(qname string) *Node {
+func (n *Node) ceil(qname prepared) *Node {
 	if n == nil {
 		return nil
 	}
-	switch c := Less(n.Elem, qname); {
+	switch c := less(qname, n.Elem.preparedName); {
 	case c == 0:
 		return n
 	case c > 0:

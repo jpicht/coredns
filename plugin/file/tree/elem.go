@@ -10,9 +10,11 @@ type Elem struct {
 }
 
 // newElem returns a new elem.
-func newElem(rr dns.RR) *Elem {
+func newElem(rr dns.RR, pn prepared) *Elem {
 	e := Elem{m: make(map[uint16][]dns.RR)}
 	e.m[rr.Header().Rrtype] = []dns.RR{rr}
+	e.name = rr.Header().Name
+	e.preparedName = pn
 	return &e
 }
 
@@ -57,21 +59,11 @@ func (e *Elem) All() []dns.RR {
 
 // Name returns the name for this node.
 func (e *Elem) Name() string {
-	if e.name != "" {
-		return e.name
-	}
-	for _, rrs := range e.m {
-		e.name = rrs[0].Header().Name
-		return e.name
-	}
-	return ""
+	return e.name
 }
 
 // PreparedName returns the less-compare-prepared name for this node.
 func (e *Elem) PreparedName() prepared {
-	if e.preparedName == nil {
-		e.preparedName = prepareName(e.Name())
-	}
 	return e.preparedName
 }
 
@@ -81,11 +73,6 @@ func (e *Elem) Empty() bool { return len(e.m) == 0 }
 // Insert inserts rr into e. If rr is equal to existing RRs, the RR will be added anyway.
 func (e *Elem) Insert(rr dns.RR) {
 	t := rr.Header().Rrtype
-	if e.m == nil {
-		e.m = make(map[uint16][]dns.RR)
-		e.m[t] = []dns.RR{rr}
-		return
-	}
 	rrs, ok := e.m[t]
 	if !ok {
 		e.m[t] = []dns.RR{rr}
@@ -98,13 +85,9 @@ func (e *Elem) Insert(rr dns.RR) {
 
 // Delete removes all RRs of type rr.Header().Rrtype from e.
 func (e *Elem) Delete(rr dns.RR) {
-	if e.m == nil {
-		return
-	}
-
 	t := rr.Header().Rrtype
 	delete(e.m, t)
 }
 
 // Less is a tree helper function that calls less.
-func Less(a *Elem, name string) int { return less(prepareName(name), a.PreparedName()) }
+func Less(a *Elem, name string) int { return less(prepareName(name), a.preparedName) }
