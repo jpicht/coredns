@@ -10,7 +10,7 @@ type set []string
 
 func (p set) Len() int           { return len(p) }
 func (p set) Swap(i, j int)      { p[i], p[j] = p[j], p[i] }
-func (p set) Less(i, j int) bool { d := less(p[i], p[j]); return d <= 0 }
+func (p set) Less(i, j int) bool { d := less(prepareName(p[i]), prepareName(p[j])); return d <= 0 }
 
 func TestLess(t *testing.T) {
 	tests := []struct {

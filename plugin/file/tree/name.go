@@ -20,6 +20,9 @@ func prepareName(s string) prepared {
 		if s[i] == '\\' && i+3 < l && s[i+1] >= '0' && s[i+2] >= '0' && s[i+3] >= '0' && s[i+1] <= '9' && s[i+2] <= '9' && s[i+3] <= '9' {
 			out = append(out[0:len(out)-3], dddToByte([]byte(s[i:])))
 			continue
+		} else if s[i] >= 'A' && s[i] <= 'Z' {
+			out = append(out, s[i]-32)
+			continue
 		} else if s[i] == '.' {
 			reversePart(out[lp:])
 			lp = len(out) + 1

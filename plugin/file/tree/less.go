@@ -28,4 +28,5 @@ func less(ap, bp prepared) int {
 	return al - bl
 }
 
+// dddToBytes decodes an array of bytes containing three numbers to one byte. The input data is not checked.
 func dddToByte(s []byte) byte { return (s[1]-'0')*100 + (s[2]-'0')*10 + (s[3] - '0') }
